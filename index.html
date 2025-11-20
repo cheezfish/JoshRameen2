@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>J & R · MMXXV</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --ink: #0D1117;
+            --charcoal: #161B22;
+            --slate: #21262D;
+            --smoke: #8B949E;
+            --pearl: #C9D1D9;
+            --ivory: #F0F6FC;
+            --gold: #D4A574;
+            --accent: #7C8DB5;
+        }
+
+        body {
+            font-family: 'Jost', sans-serif;
+            background: var(--ink);
+            color: var(--pearl);
+            overflow-x: hidden;
+            cursor: none;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body.modal-open {
+            overflow: hidden;
+        }
+        
+        /* --- PARTICLES CONTAINER --- */
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background-color: transparent;
+            z-index: 0; /* Behind content, in front of background color */
+            pointer-events: none; /* Allows clicking through to links/buttons */
+        }
+
+        #qr-code {
+            filter: invert(0.925);
+        }
+
+        .inlineimg {
+            display: block;
+            margin: 0 auto;
+            max-width: 50vw;
+        }
+
+        .cursor {
+            width: 20px;
+            height: 20px;
+            border: 0.5px solid var(--gold);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10002;
+            transition: all 0.12s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transform: translate(-50%, -50%);
+            mix-blend-mode: screen;
+        }
+
+        .cursor-follower {
+            width: 8px;
+            height: 8px;
+            background: var(--gold);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10002;
+            transition: all 0.08s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transform: translate(-50%, -50%);
+            mix-blend-mode: screen;
+        }
+
+        .grain {
+            position: fixed;
+            inset: 0;
+            background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="2" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.4"/></svg>');
+            opacity: 0.015;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 2rem 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(20px);
+            background: rgba(13, 17, 23, 0.6);
+            border-bottom: 0.5px solid rgba(212, 165, 116, 0.1);
+        }
+
+        .logo {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            font-weight: 300;
+            letter-spacing: 0.15em;
+            color: var(--gold);
+        }
+
+        .nav-date {
+            font-size: 1.1rem;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--pearl);
+            font-weight: 300;
+        }
+
+        /* Hero */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            z-index: 1; /* Ensures hero sits above particles */
+        }
+
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(to bottom, var(--ink) 0%, transparent 40%, var(--ink) 95%),
+                url('hero3.png');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .hero-bg::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 50% 30%, rgba(124, 141, 181, 0.04), transparent 60%);
+        }
+
+        .hero-grid {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(212, 165, 116, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(212, 165, 116, 0.02) 1px, transparent 1px);
+            background-size: 80px 80px;
+            opacity: 0.3;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            max-width: 1000px;
+            padding: 0 2rem;
+            margin-top: 45rem;
+        }
+
+        .hero-label {
+            display: inline-block;
+            font-size: 1rem;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            color: var(--smoke);
+            margin-bottom: 1rem;
+            font-weight: 300;
+            opacity: 0;
+            animation: fadeIn 1s ease 0.3s forwards;
+            background-color: rgba(13, 17, 23, 0.5);
+            padding: 0.5rem 1.2rem;
+            border-radius: 5px;
+            color: var(--ivory);
+        }
+
+        .hero-names {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(4rem, 16vw, 14rem);
+            font-weight: 300;
+            line-height: 0.9;
+            letter-spacing: -0.03em;
+            margin-bottom: 3rem;
+            opacity: 0;
+            animation: fadeIn 1s ease 0.6s forwards;
+        }
+
+        .hero-names .ampersand {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 0.5em;
+            color: var(--gold);
+            margin: 0 0.4em;
+            display: inline-block;
+            transform: translateY(-0.1em);
+        }
+
+        .hero-date {
+            font-size: clamp(1rem, 4vw, 1.8rem);
+            letter-spacing: 0.6em;
+            text-transform: uppercase;
+            color: var(--accent);
+            font-weight: 300;
+            margin-top: 5rem;
+            opacity: 0;
+            animation: fadeIn 1s ease 0.9s forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        /* Sections */
+        .section {
+            padding: clamp(6rem, 20vh, 16rem) 4rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1; /* Ensures content sits above particles */
+        }
+
+        .section-number {
+            font-size: 1rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 0.5rem;
+            font-weight: 300;
+        }
+
+        .section-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(2.5rem, 7vw, 6rem);
+            font-weight: 300;
+            margin-bottom: 4rem;
+            color: var(--ivory);
+            letter-spacing: -0.02em;
+        }
+
+        /* Countdown */
+        .countdown-wrapper {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1px;
+            background: rgba(212, 165, 116, 0.05);
+            border: 0.5px solid rgba(212, 165, 116, 0.1);
+        }
+
+        .time-cell {
+            background: var(--charcoal);
+            padding: 3rem 1.5rem;
+            text-align: center;
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .time-cell::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(212, 165, 116, 0.03), transparent);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .time-cell:hover {
+            background: var(--slate);
+        }
+
+        .time-cell:hover::before {
+            opacity: 1;
+        }
+
+        .time-number {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(3rem, 8vw, 7rem);
+            font-weight: 300;
+            line-height: 1;
+            color: var(--ivory);
+            display: block;
+            margin-bottom: 1rem;
+        }
+
+        .time-text {
+            font-size: 1rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--smoke);
+            font-weight: 300;
+        }
+
+        /* Details */
+        .details-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 4rem;
+        }
+        
+        @media (min-width: 768px) {
+            .details-layout {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6rem;
+            }
+        }
+
+        .detail-block {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-block::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 1px;
+            height: 40px;
+            background: linear-gradient(180deg, var(--gold), transparent);
+        }
+
+        .detail-number {
+            font-size: 1rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 2rem;
+            margin-left: 1rem;
+            font-weight: 300;
+        }
+
+        .detail-heading {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            font-weight: 400;
+            margin-bottom: 2rem;
+            color: var(--ivory);
+            line-height: 1.2;
+        }
+
+        .detail-content {
+            font-size: 1.5rem; 
+            line-height: 2;
+            color: var(--smoke);
+            font-weight: 300;
+            letter-spacing: 0.02em;
+        }
+
+        .detail-link {
+            display: inline-block;
+            margin-top: auto; 
+            padding: 0.75rem 2rem;
+            border: 0.5px solid var(--gold);
+            color: var(--ivory);
+            font-size: 0.85rem;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            text-decoration: none;
+            font-weight: 300;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            align-self: flex-start;
+        }
+
+        .detail-link::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--gold);
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .detail-link span {
+            position: relative;
+            z-index: 1;
+            transition: color 0.4s ease;
+        }
+
+        .detail-link:hover::before {
+            transform: translateY(0);
+        }
+
+        .detail-link:hover span {
+            color: var(--ink);
+        }
+
+        /* Story & Gift Policy */
+        .story-container {
+            max-width: 900px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .story-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(1.2rem, 3vw, 2.0rem);
+            line-height: 1.8;
+            color: var(--pearl);
+            font-weight: 300;
+            font-style: italic;
+            text-align: center;
+        }
+
+        .story-signature {
+            text-align: center;
+            margin-top: 4rem;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            color: var(--gold);
+            font-style: italic;
+        }
+
+        /* CTA / RSVP */
+        .cta-section {
+            background: 
+                linear-gradient(rgba(13, 17, 23, 0.5), rgba(13, 17, 23, 0.5)),
+                url('gif3.webp') no-repeat center center / cover;
+            padding: clamp(8rem, 25vh, 18rem) 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 45rem;
+        }
+
+        .cta-subtitle {
+            font-size: 1.5rem; 
+            color: var(--smoke);
+            letter-spacing: 0.05em;
+            line-height: 1.8;
+            text-align: left;
+            max-width: 50%;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 1.2rem 3rem;
+            border: 0.5px solid var(--gold);
+            color: var(--ivory);
+            font-size: 1.5rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            text-decoration: none;
+            font-weight: 300;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            cursor: none;
+            flex-shrink: 0;
+        }
+
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--gold);
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .cta-button span {
+            position: relative;
+            z-index: 1;
+            transition: color 0.4s ease;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .cta-button:hover::before {
+            transform: translateY(0);
+        }
+
+        .cta-button:hover span {
+            color: var(--ink);
+        }
+
+        /* Footer */
+        footer {
+            padding: 4rem 2rem;
+            text-align: center;
+            background: var(--ink);
+            border-top: 0.5px solid rgba(212, 165, 116, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer-monogram {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            color: var(--gold);
+            margin-bottom: 1rem;
+            font-weight: 300;
+            letter-spacing: 0.2em;
+            margin-right: -0.2em; 
+        }
+
+        .footer-text {
+            font-size: 0.7rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--smoke);
+            font-weight: 300;
+            margin-right: -0.3em; 
+        }
+
+        /* --- RSVP MODAL STYLES --- */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(13, 17, 23, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 10001;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        body.modal-open .modal-overlay {
+            display: flex;
+            opacity: 1;
+        }
+        .modal-content {
+            background: var(--charcoal);
+            border: 0.5px solid rgba(212, 165, 116, 0.2);
+            padding: 2.5rem;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        .modal-close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            font-size: 2rem;
+            color: var(--smoke);
+            background: none;
+            border: none;
+            cursor: none;
+        }
+        .modal-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.5rem;
+            color: var(--ivory);
+            margin-bottom: 1rem;
+        }
+        .modal-subtitle {
+            color: var(--smoke);
+            margin-bottom: 2rem;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group input[type="text"] {
+            width: 100%;
+            background: var(--ink);
+            border: 0.5px solid var(--slate);
+            color: var(--pearl);
+            padding: 0.8rem 1rem;
+            font-family: 'Jost', sans-serif;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        .form-group input[type="text"]:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+        .modal-button {
+            display: inline-block;
+            padding: 0rem 2rem;
+            border: 0.5px solid var(--gold);
+            color: var(--ivory);
+            font-size: 0.75rem;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            text-decoration: none;
+            font-weight: 300;
+            background: transparent;
+            cursor: none;
+            transition: all 0.3s ease;
+        }
+        .modal-button:hover {
+            background: var(--gold);
+            color: var(--ink);
+        }
+        .attendee-row {
+            border-top: 1px solid var(--slate);
+            padding: 1.5rem 0;
+        }
+        .attendee-row:last-child {
+            border-bottom: 1px solid var(--slate);
+        }
+        .attendee-name {
+            font-size: 1.2rem;
+            color: var(--pearl);
+            margin-bottom: 1rem;
+            font-weight: 400;
+        }
+        .radio-group {
+            margin-bottom: 1rem; 
+        }
+        .radio-group label {
+            margin-right: 1.5rem;
+            color: var(--smoke);
+            cursor: none;
+        }
+        .radio-group input[type="radio"] {
+            display: none;
+        }
+        .radio-group input[type="radio"] + span {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+            border-radius: 50%;
+            border: 1px solid var(--smoke);
+            vertical-align: middle;
+            transition: all 0.2s ease;
+        }
+        .radio-group input[type="radio"]:checked + span {
+            background: var(--gold);
+            border-color: var(--gold);
+            box-shadow: inset 0 0 0 3px var(--charcoal);
+        }
+        .notes-input {
+            width: 100%;
+            margin-top: 1rem;
+        }
+        #lookup-message, #submit-message {
+            margin-top: 1rem;
+            color: var(--accent);
+            min-height: 1em;
+        }
+        
+        .guest-details {
+            display: none; 
+            margin-top: 1rem;
+        }
+        .guest-details.visible {
+            display: block; 
+        }
+
+        /* Media Queries for Responsiveness */
+        @media (max-width: 1024px) {
+            body { cursor: auto; }
+            .cursor, .cursor-follower { display: none; }
+            nav { padding: 2rem; }
+            .section { padding: 6rem 2rem; }
+            .countdown-wrapper { grid-template-columns: repeat(2, 1fr); }
+            .details-layout { gap: 4rem; }
+        }
+
+        @media (max-width: 768px) {
+            nav { padding: 1.5rem; }
+            .hero-names {
+                margin-bottom: 4rem;
+            }
+            .section-title {
+                margin-bottom: 3rem;
+            }
+            .hero-content {
+                margin-top: 42rem;
+            }
+            .cta-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            .cta-subtitle {
+                max-width: 100%;
+                text-align: center;
+                margin-bottom: 1rem;
+            }
+            .cta-button {
+                padding: 1.2rem 2.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+             .countdown-wrapper {
+                grid-template-columns: 1fr;
+            }
+            .time-cell {
+                padding: 2.5rem 1.5rem;
+            }
+            .hero-date {
+                letter-spacing: 0.4em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Particles Container -->
+    <div id="particles-js"></div>
+
+    <div class="cursor"></div>
+    <div class="cursor-follower"></div>
+    <div class="grain"></div>
+
+    <nav>
+        <div class="logo">J & R</div>
+        <div class="nav-date">29.12.2025</div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-grid"></div>
+        <div class="hero-content">
+            <h1 class="hero-names">
+                Joshua <span class="ampersand">&</span> Rameen
+            </h1>
+            <div class="hero-label">Joshua Augustine & Rameen Sabir</div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="section-number">01 — Countdown</div>
+        <h2 class="section-title">Until Forever</h2>
+        <div class="countdown-wrapper">
+            <div class="time-cell">
+                <span class="time-number" id="days">00</span>
+                <span class="time-text">Days</span>
+            </div>
+            <div class="time-cell">
+                <span class="time-number" id="hours">00</span>
+                <span class="time-text">Hours</span>
+            </div>
+            <div class="time-cell">
+                <span class="time-number" id="minutes">00</span>
+                <span class="time-text">Minutes</span>
+            </div>
+            <div class="time-cell">
+                <span class="time-number" id="seconds">00</span>
+                <span class="time-text">Seconds</span>
+            </div>
+        </div>
+        <div class="hero-date">29 December 2025</div>
+    </section>
+
+    <section class="section">
+        <div class="section-number">02 — Details</div>
+        <h2 class="section-title">The Day</h2>
+        <div class="details-layout">
+            <div class="detail-block">
+                <div class="detail-number">Venue</div>
+                <h3 class="detail-heading">Rhubarb Suite</h3>
+                <div class="detail-content">
+                    Grand Sapphire Hotel & Banqueting<br>
+                    45 Imperial Way<br>
+                    CR0 4RR<br>
+                    Arrival: 12:00 - 12:30 PM<br>
+                    <br>
+                    Free parking is available on-site
+                </div>
+                <a href="https://maps.app.goo.gl/ZC5e5NKLKJVh68wc8" target="_blank" class="detail-link">
+                    <span>Get Directions</span>
+                </a>
+            </div>
+            <div class="detail-block">
+                <div class="detail-number">Photography</div>
+                <h3 class="detail-heading">Photos</h3>
+                <div class="detail-content">
+                    We want to see the night through your eyes! Please snap away and tag us so we can collect all the memories. <br> Hashtag: #JoshuaAndRameen2025<br>
+                    <a href="https://photos.app.goo.gl/oo1nq9vWaQTtPNq9A" target="_blank">
+                        <img src="qr-code(1).png" id="qr-code" alt="Google Photos Album QR Code" style="max-width:150px; margin: 1rem 0; border: 5px solid white; border-radius: 5px;">
+                    </a>
+                    <br>
+                </div>
+            </div>
+            <div class="detail-block">
+                <div class="detail-number">Schedule</div>
+                <h3 class="detail-heading">The Day</h3>
+                <div class="detail-content">
+                    12:00 PM — Arrival<br>
+                    1:00 PM — Ceremony Starts<br>
+                    4:00 PM — Bride & Groom Entrance<br>
+                    5:00 PM — Dinner Starts <br>
+                    8:00 PM — End of Proceedings<br>
+                </div>
+            </div>
+            <div class="detail-block">
+                <div class="detail-number">Dress Code</div>
+                <h3 class="detail-heading">Attire</h3>
+                <div class="detail-content">
+                    Formal attire or Traditional Dress.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section cta-section" id="rsvp">
+        <div class="section-number">03 — RSVP</div>
+        <h2 class="section-title">See You There?</h2>
+        <div class="cta-content">
+            <p class="cta-subtitle">
+                We can’t wait to celebrate with you.<br>
+                Please let us know if you can make it by 25/11/2025.
+            </p>
+            <a href="#rsvp" class="cta-button" onclick="openRsvpModal()">
+                <span>RSVP Here</span>
+            </a>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="section-number">04 — Gift Policy</div>
+        <h2 class="section-title">Gifts</h2>
+        <div class="story-container">
+            <p class="story-text" style="font-style: normal; font-size: 2.5rem; margin-bottom: 3rem;">
+                The biggest gift is you joining us to celebrate. Please do not feel obliged, but if you’d like to give a gift, a contribution towards our honeymoon would be truly appreciated.
+            </p>
+            <a href="https://prezola.com/buy/view/262806" class="cta-button" style="display: inline-block; margin: 0.5rem;">
+                <span>Contribute</span>
+            </a>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-monogram">J & R</div>
+        <div class="footer-text">MMXXV</div>
+    </footer>
+
+    <div class="modal-overlay" id="rsvp-modal">
+        <div class="modal-content">
+            <button class="modal-close-btn" onclick="closeRsvpModal()">&times;</button>
+            
+            <div id="lookup-view">
+                <h3 class="modal-title">Kindly Respond</h3>
+                <p class="modal-subtitle">Please enter the unique RSVP code found on your invitation to unlock your form.</p>
+                <div class="form-group">
+                    <input type="text" id="rsvp-code-input" placeholder="Your Unique Code">
+                </div>
+                <button class="modal-button" onclick="findInvitation()">Find Invitation</button>
+                <p id="lookup-message"></p>
+            </div>
+
+            <div id="form-view" style="display: none;">
+                <h3 class="modal-title" id="family-name-title"></h3>
+                <p class="modal-subtitle" id="form-subtitle"></p>
+                <div id="attendee-list"></div>
+                <button class="modal-button" onclick="submitRsvp()">Submit RSVP</button>
+                <p id="submit-message"></p>
+            </div>
+
+            <div id="success-view" style="display: none;">
+                <h3 class="modal-title">Thank You!</h3>
+                <p class="modal-subtitle">Your response has been received. We can't wait to celebrate with you!</p>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Particles.js Library -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    
+    <script>
+        // --- PARTICLES CONFIGURATION ---
+        particlesJS("particles-js", {
+            "particles": {
+                "number": {
+                    "value": 70,
+                    "density": {
+                        "enable": true,
+                        "value_area": 800
+                    }
+                },
+                "color": {
+                    "value": ["#ffffff", "#D4A574"] // White and Gold
+                },
+                "shape": {
+                    "type": "circle",
+                    "stroke": {
+                        "width": 0,
+                        "color": "#000000"
+                    }
+                },
+                "opacity": {
+                    "value": 0.5,
+                    "random": true,
+                    "anim": {
+                        "enable": true,
+                        "speed": 0.5,
+                        "opacity_min": 0.1,
+                        "sync": false
+                    }
+                },
+                "size": {
+                    "value": 3,
+                    "random": true,
+                    "anim": {
+                        "enable": false,
+                        "speed": 40,
+                        "size_min": 0.1,
+                        "sync": false
+                    }
+                },
+                "line_linked": {
+                    "enable": false, // Disabled for "flecks" look
+                },
+                "move": {
+                    "enable": true,
+                    "speed": 0.6,
+                    "direction": "none",
+                    "random": true,
+                    "straight": false,
+                    "out_mode": "out",
+                    "bounce": false,
+                    "attract": {
+                        "enable": false,
+                        "rotateX": 600,
+                        "rotateY": 1200
+                    }
+                }
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": {
+                    "onhover": {
+                        "enable": false // Disabled to keep it subtle and not conflict with custom cursor
+                    },
+                    "onclick": {
+                        "enable": false
+                    },
+                    "resize": true
+                }
+            },
+            "retina_detect": true
+        });
+
+        // --- EXISTING SCRIPT: CURSOR ---
+        if (window.matchMedia("(min-width: 1025px)").matches) {
+            const cursor = document.querySelector('.cursor');
+            const follower = document.querySelector('.cursor-follower');
+            let mouseX = 0, mouseY = 0, cursorX = 0, cursorY = 0, followerX = 0, followerY = 0;
+
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            });
+
+            function animate() {
+                const delay = 0.35;
+                cursorX += (mouseX - cursorX) * delay;
+                cursorY += (mouseY - cursorY) * delay;
+                followerX += (mouseX - followerX) * delay * 0.5;
+                followerY += (mouseY - followerY) * delay * 0.5;
+
+                cursor.style.left = cursorX + 'px';
+                cursor.style.top = cursorY + 'px';
+                follower.style.left = followerX + 'px';
+                follower.style.top = followerY + 'px';
+
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        // --- EXISTING SCRIPT: COUNTDOWN ---
+        const weddingDate = new Date('2025-12-29T15:00:00').getTime();
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = weddingDate - now;
+
+            if (distance < 0) {
+                ['days', 'hours', 'minutes', 'seconds'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = '00';
+                });
+                return;
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById('days').textContent = String(days).padStart(2, '0');
+            document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+            document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+            document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+        }
+
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+
+        // --- EXISTING SCRIPT: SCROLL ANIMATIONS ---
+        try {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1, rootMargin: '-50px' });
+
+            document.querySelectorAll('.time-cell, .detail-block').forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = 'all 0.8s cubic-bezier(0.23, 1, 0.32, 1)';
+                observer.observe(el);
+            });
+        } catch(e) {
+            console.error("IntersectionObserver not supported.", e);
+        }
+
+        // --- RSVP MODAL JAVASCRIPT ---
+
+        // --- CONFIGURATION ---
+        const LOOKUP_WEBHOOK_URL = "https://n8n.cheezfish.com/webhook/0d4c86df-d9f0-4bdf-a37c-ed83e8c9fdea";
+        const SUBMIT_WEBHOOK_URL = "https://n8n.cheezfish.com/webhook/f4314d3b-93f4-417c-a273-418ad4b079dc";
+
+        let familyData = [];
+
+        // --- Modal Control Functions ---
+        function openRsvpModal() {
+            document.body.classList.add('modal-open');
+        }
+
+        function closeRsvpModal() {
+            document.body.classList.remove('modal-open');
+        }
+
+        // --- REWRITTEN FUNCTION: Handles CSV parsing for editing & Generic Guest Labels ---
+        async function findInvitation() {
+            const code = document.getElementById('rsvp-code-input').value.trim().toUpperCase();
+            const messageEl = document.getElementById('lookup-message');
+
+            if (!code) {
+                messageEl.innerText = "Please enter a code.";
+                return;
+            }
+            messageEl.innerText = "Searching...";
+
+            try {
+                const response = await fetch(`${LOOKUP_WEBHOOK_URL}?code=${code}`);
+                if (!response.ok) throw new Error('Network response was not ok.');
+                
+                const data = await response.json();
+                familyData = Array.isArray(data) ? data : [data];
+
+                if (familyData.length === 0 || !familyData[0]['Invitation Recipient']) {
+                    messageEl.innerText = "Sorry, we could not find an invitation with that code.";
+                    return;
+                }
+
+                document.getElementById('lookup-view').style.display = 'none';
+                document.getElementById('form-view').style.display = 'block';
+                
+                const primaryGuest = familyData[0];
+                let inviteAllocation = parseInt(primaryGuest['Number of Invites Allocated'], 10);
+                if (isNaN(inviteAllocation) || inviteAllocation < 1) inviteAllocation = 1;
+
+                const familyName = primaryGuest['Family Name'];
+                document.getElementById('family-name-title').innerText = `RSVP for the ${familyName} Family`;
+                document.getElementById('form-subtitle').innerText = `Your invitation includes ${inviteAllocation} spot(s).`;
+
+                const attendeeListEl = document.getElementById('attendee-list');
+                attendeeListEl.innerHTML = '';
+
+                // --- PARSE EXISTING SAVED DATA ---
+                // If 'Guest Name' cell contains "John, Jane", split into array ["John", "Jane"]
+                let existingNames = [];
+                if (primaryGuest['Guest Name']) {
+                    existingNames = primaryGuest['Guest Name'].split(',').map(s => s.trim());
+                }
+                
+                // If 'Notes' cell contains "Nut allergy | No sesame", split it
+                let existingNotes = [];
+                if (primaryGuest['Notes']) {
+                    existingNotes = primaryGuest['Notes'].split('|').map(s => s.trim());
+                }
+
+                // --- GENERATE FORM SLOTS ---
+                for (let i = 0; i < inviteAllocation; i++) {
+                    
+                    // 1. Determine if this slot was previously saved
+                    const savedName = existingNames[i] || ""; 
+                    const savedNote = existingNotes[i] || "";
+                    const isPreviouslyAttending = savedName.length > 0;
+
+                    // 2. Generic Label (Guest 1, Guest 2) OR "Guest 1 (Saved Name)" if you prefer
+                    // User requested just "Guest X"
+                    let displayName = `Guest ${i + 1}`;
+
+                    // 3. Determine Radio Button State
+                    const yesChecked = isPreviouslyAttending ? "checked" : "";
+                    const noChecked = !isPreviouslyAttending ? "checked" : "";
+                    const detailsClass = isPreviouslyAttending ? "guest-details visible" : "guest-details";
+
+                    // 4. Base Unique ID (The code in the sheet)
+                    const uniqueId = primaryGuest['UniqueID'];
+
+                    const rowHtml = `
+                        <div class="attendee-row" data-uniqueid="${uniqueId}">
+                            <div class="attendee-name">${displayName}</div>
+                            
+                            <div class="form-group radio-group">
+                                <label>
+                                    <input type="radio" name="attending-${i}" value="Yes" ${yesChecked}>
+                                    <span></span> Attending
+                                </label>
+                                <label>
+                                    <input type="radio" name="attending-${i}" value="No" ${noChecked}>
+                                    <span></span> Not Attending
+                                </label>
+                            </div>
+
+                            <div class="${detailsClass}">
+                                <div class="form-group">
+                                    <input type="text" class="guest-name-input" placeholder="Full Name" value="${savedName}">
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" class="notes-input" placeholder="Dietary Needs / Notes" value="${savedNote}">
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    attendeeListEl.innerHTML += rowHtml;
+                }
+
+                // Re-attach event listener for visibility toggling
+                attendeeListEl.addEventListener('change', function(event) {
+                    if (event.target.type === 'radio') {
+                        const row = event.target.closest('.attendee-row');
+                        const details = row.querySelector('.guest-details');
+                        if (event.target.value === 'Yes') {
+                            details.classList.add('visible');
+                        } else {
+                            details.classList.remove('visible');
+                        }
+                    }
+                });
+
+            } catch (error) {
+                messageEl.innerText = "An error occurred. Please try again later.";
+                console.error(error);
+            }
+        }
+
+        // --- FUNCTION 2: Submit RSVP (no changes needed here) ---
+        async function submitRsvp() {
+            const messageEl = document.getElementById('submit-message');
+            const attendeeRows = document.querySelectorAll('.attendee-row');
+            
+            const payload = {
+                attendees: []
+            };
+
+            let formIsValid = true;
+
+            attendeeRows.forEach(row => {
+                const uniqueId = row.dataset.uniqueid;
+                const guestNameInput = row.querySelector('.guest-name-input');
+                const attendingRadio = row.querySelector(`input[name^="attending-"]:checked`);
+                
+                const isAttending = attendingRadio && attendingRadio.value === 'Yes';
+                
+                if (isAttending && !guestNameInput.value.trim()) {
+                    formIsValid = false;
+                }
+                
+                if (guestNameInput.value.trim() || isAttending) {
+                    payload.attendees.push({
+                        uniqueid: uniqueId,
+                        name: guestNameInput.value.trim(),
+                        attending: isAttending ? 'Yes' : 'No',
+                        notes: row.querySelector('.notes-input').value.trim()
+                    });
+                }
+            });
+
+            if (!formIsValid) {
+                messageEl.innerText = "Please provide a name for each guest who is attending.";
+                return;
+            }
+
+            messageEl.innerText = "Submitting...";
+
+            try {
+                const response = await fetch(SUBMIT_WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error('Submission failed.');
+
+                document.getElementById('form-view').style.display = 'none';
+                document.getElementById('success-view').style.display = 'block';
+            
+            } catch (error) {
+                messageEl.innerText = "An error occurred during submission. Please try again.";
+                console.error('Error submitting RSVP:', error);
+            }
+        }
+
+        // --- FUNCTION 3: Handle QR Code URL on page load (remains the same) ---
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const codeFromUrl = urlParams.get('code');
+            if (codeFromUrl) {
+                openRsvpModal();
+                document.getElementById('rsvp-code-input').value = codeFromUrl;
+                findInvitation(); // Automatically trigger the search
+            }
+        };
+    </script>
+</body>
+</html>
